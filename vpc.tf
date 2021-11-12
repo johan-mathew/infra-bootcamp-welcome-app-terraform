@@ -20,11 +20,33 @@ resource "aws_subnet" "welcome-demo-subnet-public-1" {
   }
 }
 
-resource "aws_network_interface" "welcome-demo-ni" {
-  subnet_id   = aws_subnet.welcome-demo-subnet-public-1.id
-  private_ips = ["10.0.1.100"]
-  security_groups = [aws_security_group.welcome-demo-sg.id]
+resource "aws_internet_gateway" "welcome-demo-ig" {
+  vpc_id = aws_vpc.welcome-demo-vpc.id
+
   tags = {
-    Name = "primary_network_interface"
+    Name = "welcome-demo-prod-abin-johan"
   }
+}
+
+# resource "aws_network_interface" "welcome-demo-ni" {
+#   subnet_id   = aws_subnet.welcome-demo-subnet-public-1.id
+#   private_ips = ["10.0.1.100"]
+#   security_groups = [aws_security_group.welcome-demo-sg.id]
+#   tags = {
+#     Name = "primary_network_interface"
+#   }
+# }
+
+resource "aws_route_table" "welcome-demo-rt" {
+  vpc_id = aws_vpc.welcome-demo-vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.welcome-demo-ig.id
+  }
+
+}
+resource "aws_route_table_association" "rta_subnet_public" {
+  subnet_id      = aws_subnet.welcome-demo-subnet-public-1.id
+  route_table_id = aws_route_table.welcome-demo-rt.id
 }
